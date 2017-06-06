@@ -1,7 +1,7 @@
 FROM php:7.1.4-fpm-alpine
 RUN apk update \
     && apk add --no-cache \
-        $PHPIZE_DEPS openssl-dev pcre-dev supervisor dcron libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev libmcrypt-dev libxml2-dev ffmpeg-dev \
+        $PHPIZE_DEPS openssl-dev pcre-dev supervisor dcron libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev libmcrypt-dev libxml2-dev ffmpeg \
     && pecl channel-update pecl.php.net \
     && pecl install mongodb \
     && pecl install redis \
