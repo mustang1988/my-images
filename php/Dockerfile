@@ -5,7 +5,6 @@ RUN apk update \
     && pecl channel-update pecl.php.net \
     && pecl install mongodb \
     && pecl install redis \
-    && pecl install zookeeper-0.4.0 \
     && docker-php-ext-install bcmath exif mcrypt mysqli pdo_mysql shmop soap sockets sysvsem xmlrpc zip \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
