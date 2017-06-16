@@ -13,4 +13,5 @@ RUN apk update \
     && apk del openssl-dev \
     && apk del pcre-dev \
     && rm -rf /tmp/pear/* \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* \
+    && echo alias ll=\'ls -l\' >> /etc/profile
