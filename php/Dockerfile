@@ -1,4 +1,4 @@
-FROM php:7.1.4-fpm-alpine
+FROM php:7.1.6-fpm-alpine
 RUN apk update \
     && apk add --no-cache \
         $PHPIZE_DEPS openssl-dev pcre-dev supervisor dcron libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev libmcrypt-dev libxml2-dev \
