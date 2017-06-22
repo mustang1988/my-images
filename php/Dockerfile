@@ -1,7 +1,10 @@
 FROM php:7.1.4-fpm-alpine
+
+ENV NGINX_VERSION 1.12.0
+
 RUN apk update \
     && apk add --no-cache \
-        $PHPIZE_DEPS openssl-dev pcre-dev supervisor dcron libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev libmcrypt-dev libxml2-dev \
+        $PHPIZE_DEPS openssl-dev pcre-dev supervisor dcron libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev libmcrypt-dev libxml2-dev gcc libc-dev make zlib-dev linux-headers curl gnupg libxslt-dev gd-dev geoip-dev \
     && pecl channel-update pecl.php.net \
     && pecl install mongodb \
     && pecl install redis \
@@ -9,11 +12,7 @@ RUN apk update \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
     && docker-php-ext-enable bcmath exif gd mcrypt mysqli pdo_mysql shmop soap sockets sysvsem xmlrpc zip mongodb redis \
-    && apk del $PHPIZE_DEPS \
-    && apk del openssl-dev \
-    && apk del pcre-dev \
-    && rm -rf /tmp/pear/* \
-    && rm -rf /var/cache/apk/* \
+    && GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     && CONFIG="\
         --prefix=/etc/nginx \
         --sbin-path=/usr/sbin/nginx \
@@ -61,19 +60,6 @@ RUN apk update \
     " \
     && addgroup -S nginx \
     && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
-    && apk add --no-cache --virtual .build-deps \
-        gcc \
-        libc-dev \
-        make \
-        openssl-dev \
-        pcre-dev \
-        zlib-dev \
-        linux-headers \
-        curl \
-        gnupg \
-        libxslt-dev \
-        gd-dev \
-        geoip-dev \
     && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
     && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
     && export GNUPGHOME="$(mktemp -d)" \
@@ -140,6 +126,11 @@ RUN apk update \
     \
     # forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
+    && apk del $PHPIZE_DEPS \
+    && apk del openssl-dev \
+    && apk del pcre-dev \
+    && rm -rf /tmp/pear/* \
+    && rm -rf /var/cache/apk/*
 
 EXPOSE 80
