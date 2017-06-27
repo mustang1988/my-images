@@ -8,4 +8,6 @@ COPY supervisord.conf /etc/supervisord.conf
 
 COPY start.sh /start.sh
 
+EXPOSE 9001
+
 ENTRYPOINT ["sh","/start.sh"]
