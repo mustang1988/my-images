@@ -143,7 +143,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     && apk del $PHPIZE_DEPS \
     && apk del openssl-dev \
-    && apk del pcre-dev \
+    && apk del pcre-dev dpkg-dev zlib-dev freetype-dev musl-dev libc-dev libjpeg-turbo-dev libmcrypt-dev libxml2-dev openssl-dev pcre-dev py-setuptools \
     && rm -rf /tmp/pear/* \
     && rm -rf /var/cache/apk/* \
     && rm -rf /etc/supervisord.conf
