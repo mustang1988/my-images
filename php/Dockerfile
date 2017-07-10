@@ -10,13 +10,7 @@ RUN apk update \
     && docker-php-ext-install opcache bcmath exif mcrypt mysqli pdo_mysql shmop soap sockets sysvsem xmlrpc zip \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
-    && docker-php-ext-enable opcache bcmath exif gd mcrypt mysqli pdo_mysql shmop soap sockets sysvsem xmlrpc zip mongodb redis \
-    && apk del $PHPIZE_DEPS \
-    && apk del openssl-dev \
-    && apk del pcre-dev \
-    && rm -rf /tmp/pear/* \
-    && rm -rf /var/cache/apk/* \
-    && rm -rf /etc/supervisord.conf
+    && docker-php-ext-enable opcache bcmath exif gd mcrypt mysqli pdo_mysql shmop soap sockets sysvsem xmlrpc zip mongodb redis
 
 # install nginx
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
@@ -146,7 +140,13 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     \
     # forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+    && ln -sf /dev/stderr /var/log/nginx/error.log \
+    && apk del $PHPIZE_DEPS \
+    && apk del openssl-dev \
+    && apk del pcre-dev \
+    && rm -rf /tmp/pear/* \
+    && rm -rf /var/cache/apk/* \
+    && rm -rf /etc/supervisord.conf
 
 COPY supervisord.conf /etc/supervisord.conf
 
