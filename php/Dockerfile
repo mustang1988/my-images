@@ -1,12 +1,5 @@
-#
-# NOTE: THIS DOCKERFILE IS GENERATED VIA "update.sh"
-#
-# PLEASE DO NOT EDIT IT DIRECTLY.
-#
-
 FROM alpine:3.4
 
-# persistent / runtime deps
 ENV PHPIZE_DEPS \
 		autoconf \
 		dpkg-dev dpkg \
@@ -24,7 +17,6 @@ RUN apk add --no-cache --virtual .persistent-deps \
 		tar \
 		xz
 
-# ensure www-data user exists
 RUN set -x \
 	&& addgroup -g 82 -S www-data \
 	&& adduser -u 82 -D -S -G www-data www-data
@@ -111,23 +103,14 @@ RUN set -xe \
 		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
 		\
 		--disable-cgi \
-		\
-# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
 		--enable-ftp \
-# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
-# --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
 		--enable-mysqlnd \
-		\
 		--with-curl \
 		--with-libedit \
 		--with-openssl \
 		--with-zlib \
-		\
-# bundled pcre is too old for s390x (which isn't exactly a good sign)
-# /usr/src/php/ext/pcre/pcrelib/pcre_jit_compile.c:65:2: error: #error Unsupported architecture
 		--with-pcre-regex=/usr \
-		\
 		$PHP_EXTRA_CONFIGURE_ARGS \
 	&& make -j "$(nproc)" \
 	&& make install \
@@ -135,7 +118,6 @@ RUN set -xe \
 	&& make clean \
 	&& cd / \
 	&& docker-php-source delete \
-	\
 	&& runDeps="$( \
 		scanelf --needed --nobanner --recursive /usr/local \
 			| awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
@@ -144,18 +126,13 @@ RUN set -xe \
 			| sort -u \
 	)" \
 	&& apk add --no-cache --virtual .php-rundeps $runDeps \
-	\
-	&& apk del .build-deps \
-	\
-# https://github.com/docker-library/php/issues/443
-	&& pecl update-channels \
-	&& rm -rf /tmp/pear ~/.pearrc
+	&& apk del .build-deps
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 WORKDIR /
 
-RUN apk add --no-cache \
+RUN apk add --no-cache --virtual .phpextsdeps \
         $PHPIZE_DEPS openssl-dev pcre-dev libpng-dev freetype-dev libjpeg-turbo-dev libpng-dev libmcrypt-dev libxml2-dev \
     && pecl channel-update pecl.php.net \
     && pecl install mongodb \
@@ -164,9 +141,7 @@ RUN apk add --no-cache \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
     && docker-php-ext-enable bcmath exif gd mcrypt mysqli pdo_mysql shmop soap sockets sysvsem xmlrpc zip mongodb redis \
-    && apk del $PHPIZE_DEPS \
-    && apk del openssl-dev \
-    && apk del pcre-dev \
+    && apk del .phpextsdeps \
     && rm -rf /tmp/pear/* \
     && rm -rf /var/cache/apk/* \
     && rm -rf /etc/supervisord.conf
